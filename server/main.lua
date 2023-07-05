@@ -188,6 +188,33 @@ QBCore.Commands.Add("pobject", Lang:t("commands.place_object"), {{name = "type",
     end
 end)
 
+QBCore.Commands.Add('fine', Lang:t("commands.fine"), {{name = 'id', help = Lang:t('info.player_id')}, {name = 'amount', help = Lang:t('info.amount')}}, false, function(source, args)
+    local biller = QBCore.Functions.GetPlayer(source)
+    local billed = QBCore.Functions.GetPlayer(tonumber(args[1]))
+    local amount = tonumber(args[2])
+    if biller.PlayerData.job.name == "sheriff" then
+        if billed ~= nil then
+            if biller.PlayerData.citizenid ~= billed.PlayerData.citizenid then
+                if amount and amount > 0 then
+                    billed.Functions.RemoveMoney('bank', amount, "paid-fine")
+                    TriggerClientEvent('QBCore:Notify', source, Lang:t("info.fine_issued"), 'success')
+                    TriggerClientEvent('QBCore:Notify', billed.PlayerData.source, Lang:t("info.received_fine"))
+                    exports['qb-management']:AddMoney('sheriff', amount)
+                else
+                    TriggerClientEvent('QBCore:Notify', source, Lang:t("error.amount_higher"), 'error')
+                end
+            else
+                TriggerClientEvent('QBCore:Notify', source, Lang:t("error.fine_yourself"), 'error')
+            end
+        else
+            TriggerClientEvent('QBCore:Notify', source, Lang:t("error.not_online"), 'error')
+        end
+    else
+        TriggerClientEvent('QBCore:Notify', source, Lang:t("error.on_duty_police_only"), 'error')
+    end
+end)
+
+
 QBCore.Commands.Add("cuff", Lang:t("commands.cuff_player"), {}, false, function(source, args)
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
@@ -726,16 +753,21 @@ end)
 
 RegisterNetEvent('sheriff:server:BillPlayer', function(playerId, price)
     local src = source
+    local playerPed = GetPlayerPed(src)
+    local targetPed = GetPlayerPed(playerId)
+    local playerCoords = GetEntityCoords(playerPed)
+    local targetCoords = GetEntityCoords(targetPed)
+    if #(playerCoords - targetCoords) > 2.5 then return DropPlayer(src, "Attempted exploit abuse") end
+
     local Player = QBCore.Functions.GetPlayer(src)
     local OtherPlayer = QBCore.Functions.GetPlayer(playerId)
-    if Player.PlayerData.job.name == "sheriff" then
-        if OtherPlayer then
-            OtherPlayer.Functions.RemoveMoney("bank", price, "paid-bills")
-            TriggerEvent('qb-bossmenu:server:addAccountMoney', "sheriff", price)
-            TriggerClientEvent('QBCore:Notify', OtherPlayer.PlayerData.source, Lang:t("info.fine_received", {fine = price}))
-        end
-    end
+    if not Player or not OtherPlayer or Player.PlayerData.job.name ~= "police" then return end
+
+    OtherPlayer.Functions.RemoveMoney("bank", price, "paid-bills")
+    exports['qb-management']:AddMoney("sheriff", price)
+    TriggerClientEvent('QBCore:Notify', OtherPlayer.PlayerData.source, Lang:t("info.fine_received", {fine = price}))
 end)
+
 
 RegisterNetEvent('sheriff:server:JailPlayer', function(playerId, time)
     local src = source
