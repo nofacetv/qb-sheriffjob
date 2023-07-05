@@ -35,7 +35,7 @@ DE
 
 ## Dependencies
 - [qb-core](https://github.com/qbcore-framework/qb-core) -To implement the job
-- [qb-management] (https://github.com/qbcore-framework/qb-management) - for boss menu
+- [qb-management](https://github.com/qbcore-framework/qb-management) - for boss menu
 - [qb-garages](https://github.com/qbcore-framework/qb-garages) - For the vehicle spawner
 - [qb-clothing](https://github.com/qbcore-framework/qb-clothing) - For the locker room
 - [qb-phone](https://github.com/qbcore-framework/qb-phone) - For the MEOS app and notifications etc.
