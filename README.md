@@ -2,11 +2,11 @@
  Sheriff job for QBCore 
  <p>
  <b>
-I edited policejob for sheriffs and i am planning to add more locales support.
+I edited policejob for sheriffs and corrected deprecated dependencies
 </b>
 </p>
 <p>
-Configured for GABZ paleto sheriff
+Configured for Sandy shores
 </p>
 <p>
 Locales in progress:
